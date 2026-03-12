@@ -16,20 +16,6 @@ div {
 }
 
 
-<!DOCTYPE html>
-<html>
-<head>
-<title>Page Title</title>
-<link rel="stylesheet" href="style.css">
-</head>
-<body>
-
-<div></div>
-
-</body>
-</html>
-
-
 @keyframes myAnimation {
   0%   {background-color:red; left:0px; top:0px;}
   25%  {background-color:yellow; left:200px; top:0px;}
@@ -37,3 +23,4 @@ div {
   75%  {background-color:green; left:0px; top:200px;}
   100% {background-color:red; left:0px; top:0px;}
 }
+
