@@ -1,0 +1,159 @@
+---
+title: "Unit 3 Project"
+author:
+output: html_document
+date: "2026-02-06"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message=FALSE)
+```
+
+Below is a template to get you started on the Unit 3 Project. Make sure you edit the metadata above to include your name. For questions that include code, the template to produce `R` chunks is below. **Any code you write that produces an output must be fully visible in the HTML document you hand in!**
+
+```{r}
+# Part I: Morphological Data
+
+## Question 1
+
+library(MASS)
+library(tidyverse)
+library(ggplot2)
+library(GGally)
+library(klaR)
+Flowerdata <- iris %>% group_by(Species) %>% summarise(petallength= mean(Petal.Length), petalwidth= mean(Petal.Width), sepallength= mean(Sepal.Length), sepalwidth= mean(Sepal.Width))
+print(Flowerdata)
+# The data seems statistically significant. 
+```
+
+```{r}
+## Question 2
+ggplot(iris, aes(x= Petal.Length, y= Petal.Width))+ geom_point()+labs(title = "Edgar Anderson's Iris Data", x = "petal length", y = "petal width", ) + theme_minimal(base_size = 20)
+ggplot(iris, aes(x= Petal.Length, y= Sepal.Length))+ geom_point()+ labs(title = "Edgar Anderson's Iris Data", x = "petal length", y = "sepal length") + theme_minimal(base_size = 20)
+ggplot(iris, aes(x= Petal.Length, y= Sepal.Width))+ geom_point()+labs(title = "Edgar Anderson's Iris Data", x = "petal length", y = "sepal width") + theme_minimal(base_size = 20)
+ggplot(iris, aes(x= Petal.Width, y= Petal.Length))+ geom_point()+ labs(title = "Edgar Anderson's Iris Data", x = "petal width", y = "petal length") + theme_minimal(base_size = 20)
+ggplot(iris, aes(x=Petal.Width, y= Sepal.Length))+ geom_point() + labs(title = "Edgar Anderson's Iris Data", x = "petal width", y = "sepal length") + theme_minimal(base_size = 20)
+ggplot(iris, aes(x= Petal.Width, y= Sepal.Width))+ geom_point()+labs(title = "Edgar Anderson's Iris Data", x = "petal width", y = "sepal width") + theme_minimal(base_size = 20)
+ggplot(iris, aes(x= Petal.Length, y= Sepal.Length))+ geom_point()+ labs(title = "Edgar Anderson's Iris Data", x = "petal length", y = "sepal length") + theme_minimal(base_size = 20)
+ggplot(iris, aes(x= Petal.Length, y= Sepal.Width))+ geom_point()+labs(title = "Edgar Anderson's Iris Data", x = "petal length", y = "petal width") + theme_minimal(base_size = 20)
+ggplot(iris, aes(x= Petal.Width, y= Petal.Length))+ geom_point()+ labs(title = "Edgar Anderson's Iris Data", x = "petal length", y = "sepal length") + theme_minimal(base_size = 20)
+ggplot(iris, aes(x=Petal.Width, y= Sepal.Length))+ geom_point() + labs(title = "Edgar Anderson's Iris Data", x = "petal length", y = "sepal length") + theme_minimal(base_size = 20)
+```
+
+## Question 3
+```{r}
+fit <- lda(data, group)
+print(fit)
+pred.fit <- predict(fit, iris)
+predictions <- pred.fit$class
+new.iris <- iris %>% dplyr::select(Species) %>%add_column(predictions)
+view(new.iris)
+library(klaR)
+partimat(iris[1:4], unclass(iris$Species), method = "lda", main = "1=setosa, 2=versicolor, 3=virginica", imageplot = FALSE)
+```
+
+# There is no difference between the plots, and they explored the relationship between two possible variables to accurately draw conclusion from such data. 
+ 
+## Question 4
+
+# I used the correlation coefficient and determined the plot with a correlation coefficient with 0.033 in the bottom gave the best predicttions of species because the data values are more effectively clustered.
+
+
+
+
+# Part II: Geographical and temporal data 
+```{r}
+library(tidyverse)
+iris_gps <- read_csv("iris_gps.csv")
+install.packages("dismo")
+library(dismo)
+get.gbif <- function(genus, species, na.rm = TRUE, crop = TRUE) {
+    # GBIF query
+    gps <- gbif(genus, species, geo = FALSE)
+    # drop NA entries; note that this option is visited only with na.rm=TRUE
+    if (na.rm) {
+        gps <- subset(gps, !is.na(lon) & !is.na(lat))
+    }
+    if (crop) {
+        keep <- c(which(colnames(gps) == "species"), which(colnames(gps) == "lat"), which(colnames(gps) == "lon"), which(colnames(gps) ==
+            "month"))
+        gps <- gps[keep]
+    }
+    return(gps)
+}
+```
+
+## Question 1
+```{r}
+tiger <- get.gbif("Panthera", "tigris")
+jaguar <- get.gbif("Panthera", "onca")
+leopard <- get.gbif("Panthera", "pardus")
+library(dplyr)
+iris_gps1 <- bind_rows(tiger, jaguar, leopard)
+install.packages("maps")
+library(maps)
+ggplot2::theme_set(theme_bw())
+world.map <- map_data(map = "world")
+us.map <- map_data(map = "usa")
+ggplot(world.map, aes(long, lat, group = group)) + geom_polygon(fill = "white", colour = "grey50") + coord_quickmap() + geom_point(data = iris_gps1, mapping = aes(x = lon, y = lat, group = species, color = species), size = 0.5)
+# Panthera pardus occurs mostly at Africa. 
+```
+
+```{r}
+## Question 2
+min_lon <- min(us.map$long)
+max_lon <- max(us.map$long)
+min_lat <- min(us.map$lat)
+max_lat <- max(us.map$lat)
+iris_NE <- iris_gps %>% filter(lon >= min_lon,lon <= max_lon, lat >= min_lat, lat <= max_lat)
+ggplot(us.map, aes(long, lat, group = group)) + geom_polygon(fill = "white", colour = "grey50") + coord_quickmap() + geom_point(data = iris_NE,
+    mapping = aes(x= lon, y=lat, group = species, color = species), size = 0.5)
+```
+
+```{r}
+## Question 3
+us.map <- map_data(map = "state")
+northeast_states <- c("maine", "new hampshire","vermont","massachusetts", "rhode island", "connecticut", "new york","new jersey", "pennsylvania")
+us_NE <- iris_gps %>% filter(us.map %in% northeast_states)
+ggplot(us.map, aes(long, lat, group = group)) + geom_polygon(fill = "white", colour = "grey50") + coord_quickmap() + geom_point(data = us_NE, mapping = aes(x = long, y = lat, group = group, color = state), size = 0.5)
+```
+## Question 4
+
+
+```{r}
+# Iris virginica occupies the entire right side of the U.S. Iris versicolor occupies a portion of the northeastern U.S. Iris setosa is scarce inside the U.S. There are regions where iris virginica and iris versicolor overlap, and they both have their own regions.  The species occurrence data presents data about flowering time(month each iris species is observed) and location. 
+```
+
+## Question 5
+```{r}
+iris_gps <- ggplot(data = iris_gps, aes(x = month_name, group = species, fill = species)) + geom_histogram(position = "dodge", binwidth = 1) + facet_wrap(~species, nrow = 3) + theme_minimal()+ labs(title= "Flowering Times for Iris Species")
+```
+# Part III: Chromosomal data 
+
+## Question 1
+```{r}
+iris_chrom_dataset <- read_csv("Iris (1).csv", skip=1, col_names= TRUE, skip_empty_rows= TRUE)
+iris_chrom <- iris_chrom_dataset %>% dplyr::select(resolved_name, sporophytic, parsed_n) %>% separate( resolved_name, into = c("genus", "species"), sep = " ", remove = TRUE, extra = "drop")
+head(iris_chrom)
+iris_data <- iris_chrom  %>%
+separate_rows(sporophytic, sep = ",", "") %>% str_replace_all(sporophytic, "2n=") %>% str_replace(sporophytic, "c.", "") %>% str_replace(sporophytic, "ca.", "") %>% str_replace(sprophytic, "-", "") %>% str_replace(sprophytic, "+1B", "")
+  mutate(sporophytic = as.numeric(sporophytic))
+  summarize(sporophytelength= mean(iris_chrom $sporophytic, na.rm= TRUE), chromosomenumbers= mean(parsed_n, na.rm= TRUE))
+```
+## Question 2
+```{r}
+iris_data <- as.numeric(iris_chrom$sporophytic)
+ggplot(iris_chrom, aes(x= sporophytic, y= after_stat(density))) + geom_histogram(binwidth= 10, fill= "grey50", color= "grey25") + facet_wrap(~species) + labs(x= "Sporophytic counts", y= "Frequency")+ theme_minimal(base_size=20) 
+```
+
+## Question 3
+```{r}
+#There a few areas of overlap between the iris versicolor and iris virgicana but they are scarce in the U.S.
+```
+
+
+# Part IV: Producing a scientific argument
+
+## Question 1
+# No conclusion about species delineation can be made because the temporal data shows only the location of each species.  
+```
